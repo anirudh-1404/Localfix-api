@@ -2,6 +2,7 @@ import express from "express";
 import "dotenv/config";
 import cors from "cors";
 import { connectdb } from "./config/db.js";
+import mongoose from "mongoose";
 
 import userRoutes from "./routes/userRoutes.js";
 

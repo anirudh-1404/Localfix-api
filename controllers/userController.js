@@ -1,9 +1,11 @@
 import { User } from "../models/userSchema.js";
+import { genToken } from "../utils/authToken.js";
 import { comparePassword, hashedPassword } from "../utils/hashedPass.js";
 
 export const registerUser = async (req, res, next) => {
   try {
     const { name, email, password } = req.body;
+    console.log(req.body);
     if (!name || !email || !password) {
       return res.status(400).json({
         message: "All fields are required!",
@@ -11,7 +13,6 @@ export const registerUser = async (req, res, next) => {
     }
 
     const isUser = await User.findOne({ email });
-
     if (isUser) {
       return res.status(403).json({
         message: "User already exists!",
@@ -23,6 +24,14 @@ export const registerUser = async (req, res, next) => {
       name,
       email,
       password: hashed,
+    });
+
+    const token = await genToken(user._id);
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: false,
+      sameSite: "strict",
+      maxAge: 24 * 60 * 60 * 1000 * 2,
     });
 
     return res.status(201).json({
@@ -60,6 +69,13 @@ export const loginUser = async (req, res, next) => {
     );
 
     if (isPasswordCorrect) {
+      const token = await genToken(isUserExists._id);
+      res.cookie("token", token, {
+        httpOnly: true,
+        secure: false,
+        sameSite: "strict",
+        maxAge: 24 * 60 * 60 * 1000 * 2,
+      });
       return res.status(200).json({
         message: "Login successfull",
         id: isUserExists._id,

@@ -9,9 +9,8 @@ const userSchema = new mongoose.Schema(
     email: {
       type: String,
       required: true,
-      trim: true,
       unique: true,
-      lowercase: true,
+      index: true,
     },
     password: {
       type: String,
@@ -23,7 +22,10 @@ const userSchema = new mongoose.Schema(
       default: "customer",
     },
   },
-  { timestamps: true },
+  {
+    timestamps: true,
+    autoIndex: true,
+  },
 );
 
-export const User = mongoose.model("User", userSchema);
+export const User = mongoose.models.User || mongoose.model("User", userSchema);
