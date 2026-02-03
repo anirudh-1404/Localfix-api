@@ -92,3 +92,17 @@ export const loginUser = async (req, res, next) => {
     });
   }
 };
+export const logoutUser = async(req,res)=>{
+  try{
+    res.cookie("token", "",{
+      httpOnly: true,
+      secure: process.enev.NODE_ENV ==='production',
+      sameSite:" strict",
+      expires: new Date(0),
+    });
+  }catch(err){
+    return res.status(500).json({
+      message:err.message,
+    });
+  }
+};
