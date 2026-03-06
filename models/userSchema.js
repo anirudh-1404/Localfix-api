@@ -21,6 +21,10 @@ const userSchema = new mongoose.Schema(
       enum: ["admin", "serviceProvider", "customer"],
       default: "customer",
     },
+    isPasswordResetRequired: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,

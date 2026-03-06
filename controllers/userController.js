@@ -90,6 +90,7 @@ export const loginUser = async (req, res, next) => {
           name: isUserExists.name,
           role: isUserExists.role,
           email: isUserExists.email,
+          isPasswordResetRequired: isUserExists.isPasswordResetRequired,
         },
         token
       });
@@ -143,5 +144,28 @@ export const getAllUsers = async (req, res) => {
     return res.status(500).json({
       message: err.message,
     });
+  }
+};
+export const updatePassword = async (req, res) => {
+  try {
+    const { newPassword } = req.body;
+    const userId = req.user.id;
+
+    if (!newPassword) {
+      return res.status(400).json({ message: "New password is required" });
+    }
+
+    const hashed = await hashedPassword(newPassword);
+    await User.findByIdAndUpdate(userId, {
+      password: hashed,
+      isPasswordResetRequired: false,
+    });
+
+    return res.status(200).json({
+      message: "Password updated successfully",
+      success: true,
+    });
+  } catch (err) {
+    return res.status(500).json({ message: err.message });
   }
 };
