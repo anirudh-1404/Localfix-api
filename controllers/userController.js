@@ -30,7 +30,7 @@ export const registerUser = async (req, res, next) => {
     res.cookie("token", token, {
       httpOnly: true,
       secure: false,
-      sameSite: "strict",
+      sameSite: "lax",
       maxAge: 24 * 60 * 60 * 1000 * 2,
     });
 
@@ -42,13 +42,44 @@ export const registerUser = async (req, res, next) => {
         name: user.name,
         role: user.role,
         email: user.email,
+        addresses: user.addresses,
       },
-      token
     });
   } catch (err) {
     return res.status(500).json({
       message: err.message,
     });
+  }
+};
+
+export const logoutUser = async (req, res) => {
+  try {
+    res.clearCookie("token", {
+      httpOnly: true,
+      secure: false, // Set to true in production
+      sameSite: "lax",
+    });
+    return res.status(200).json({
+      success: true,
+      message: "Logged out successfully",
+    });
+  } catch (err) {
+    return res.status(500).json({ message: err.message });
+  }
+};
+
+export const getMe = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select("-password");
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+    return res.status(200).json({
+      success: true,
+      data: user,
+    });
+  } catch (err) {
+    return res.status(500).json({ message: err.message });
   }
 };
 
@@ -79,7 +110,7 @@ export const loginUser = async (req, res, next) => {
       res.cookie("token", token, {
         httpOnly: true,
         secure: false,
-        sameSite: "strict",
+        sameSite: "lax",
         maxAge: 24 * 60 * 60 * 1000 * 2,
       });
       return res.status(200).json({
@@ -90,9 +121,9 @@ export const loginUser = async (req, res, next) => {
           name: isUserExists.name,
           role: isUserExists.role,
           email: isUserExists.email,
+          addresses: isUserExists.addresses,
           isPasswordResetRequired: isUserExists.isPasswordResetRequired,
         },
-        token
       });
     } else {
       return res.status(403).json({
@@ -167,5 +198,119 @@ export const updatePassword = async (req, res) => {
     });
   } catch (err) {
     return res.status(500).json({ message: err.message });
+  }
+};
+
+export const getAddresses = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(404).json({ success: false, message: "User not found" });
+
+    res.status(200).json({
+      success: true,
+      data: user.addresses,
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+export const addAddress = async (req, res) => {
+  try {
+    const { line1, area, city, pincode, contactName, contactNumber, isDefault } = req.body;
+
+    if (!line1 || !area || !city || !pincode || !contactName || !contactNumber) {
+      return res.status(400).json({ success: false, message: "All fields are required" });
+    }
+
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(404).json({ success: false, message: "User not found" });
+
+    // If this is the first address, make it default
+    const isFirstAddress = user.addresses.length === 0;
+    const addressData = {
+      line1,
+      area,
+      city,
+      pincode,
+      contactName,
+      contactNumber,
+      isDefault: isDefault || isFirstAddress,
+    };
+
+    // If new address is set to default, unset others
+    if (addressData.isDefault) {
+      user.addresses.forEach(addr => addr.isDefault = false);
+    }
+
+    user.addresses.push(addressData);
+    await user.save();
+
+    res.status(201).json({
+      success: true,
+      message: "Address added successfully",
+      data: user.addresses,
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+export const updateAddress = async (req, res) => {
+  try {
+    const { addressId } = req.params;
+    const updates = req.body;
+
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(404).json({ success: false, message: "User not found" });
+
+    const address = user.addresses.id(addressId);
+    if (!address) return res.status(404).json({ success: false, message: "Address not found" });
+
+    // If setting this one to default, unset others
+    if (updates.isDefault) {
+      user.addresses.forEach(addr => addr.isDefault = false);
+    }
+
+    Object.assign(address, updates);
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Address updated successfully",
+      data: user.addresses,
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+export const deleteAddress = async (req, res) => {
+  try {
+    const { addressId } = req.params;
+
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(404).json({ success: false, message: "User not found" });
+
+    const addressToDelete = user.addresses.id(addressId);
+    if (!addressToDelete) return res.status(404).json({ success: false, message: "Address not found" });
+
+    const wasDefault = addressToDelete.isDefault;
+    user.addresses.pull(addressId);
+
+    // If we deleted the default address, make the first remaining one default
+    if (wasDefault && user.addresses.length > 0) {
+      user.addresses[0].isDefault = true;
+    }
+
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Address deleted successfully",
+      data: user.addresses,
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
   }
 };

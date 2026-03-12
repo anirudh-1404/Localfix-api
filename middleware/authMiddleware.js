@@ -6,6 +6,9 @@ import { User } from "../models/userSchema.js";
 export const protect = async (req, res, next) => {
   let token;
 
+  console.log("Cookies:", req.cookies);
+  console.log("Auth Header:", req.headers.authorization);
+
   // 1. Bearer token from header (Postman, mobile apps)
   if (req.headers.authorization && req.headers.authorization.startsWith("Bearer")) {
     token = req.headers.authorization.split(" ")[1];
@@ -14,6 +17,8 @@ export const protect = async (req, res, next) => {
   else if (req.cookies?.token) {
     token = req.cookies.token;
   }
+
+  console.log("Extracted Token:", token ? "Token present" : "No token");
 
   if (!token) {
     return res.status(401).json({
