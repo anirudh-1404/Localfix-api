@@ -6,6 +6,9 @@ import { User } from "../models/userSchema.js";
 export const protect = async (req, res, next) => {
   let token;
 
+  console.log("Cookies:", req.cookies);
+  console.log("Auth Header:", req.headers.authorization);
+
   // 1. Bearer token from header (Postman, mobile apps)
   if (req.headers.authorization && req.headers.authorization.startsWith("Bearer")) {
     token = req.headers.authorization.split(" ")[1];
@@ -15,6 +18,8 @@ export const protect = async (req, res, next) => {
     token = req.cookies.token;
   }
 
+  console.log("Extracted Token:", token ? "Token present" : "No token");
+
   if (!token) {
     return res.status(401).json({
       success: false,
@@ -23,16 +28,12 @@ export const protect = async (req, res, next) => {
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
 
     req.user = await User.findById(decoded.id).select("-password");
 
     if (!req.user) {
       return res.status(401).json({ success: false, message: "User not found" });
-    }
-
-    if (!req.user.isActive) {
-      return res.status(401).json({ success: false, message: "Account is inactive" });
     }
 
     next();

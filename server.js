@@ -22,10 +22,10 @@ const __dirname = path.dirname(__filename);
 const app = express();
 
 app.use(cors({
-  origin: "*",
+  origin: "http://localhost:5173",
   credentials: true,
-  methods: ["GET", "POST", "PUT", "DELETE"],
-  allowedHeaders: ["Content-Type", "Authorization"]
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+  allowedHeaders: ["Content-Type", "Authorization", "Cookie"]
 }));
 
 app.use(cookieParser());
@@ -38,6 +38,7 @@ app.use("/api/services", serviceRoutes);
 app.use("/api/providers", providerRoutes);
 app.use("/api/problems", problemRoutes);
 app.use("/api/cart", cartRoutes);
+app.use("/api/booking", bookingRoutes);
 app.get("/api/health", (req, res) => {
   res.status(200).json({ message: "Server is running", status: "ok" });
 });

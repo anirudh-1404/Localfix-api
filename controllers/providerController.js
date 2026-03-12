@@ -1,5 +1,9 @@
 import { Provider } from "../models/providerSchema.js";
+import { User } from "../models/userSchema.js";
 import fs from "fs";
+import * as emailService from "../services/emailService.js";
+import { hashedPassword } from "../utils/hashedPass.js";
+import crypto from "crypto";
 
 // Enroll Service Provider
 export const enrollProvider = async (req, res) => {
@@ -64,6 +68,9 @@ export const enrollProvider = async (req, res) => {
         }
 
         const provider = await Provider.create(providerData);
+
+        // Send confirmation email to provider
+        await emailService.sendApplicationReceivedEmail(email, ownerName);
 
         res.status(201).json({
             message: "Enrollment request submitted successfully",
@@ -147,6 +154,51 @@ export const updateProviderStatus = async (req, res) => {
 
         if (!provider) {
             return res.status(404).json({ message: "Provider not found" });
+        }
+
+        // Handle post-status update actions
+        if (status === "approved") {
+            let tempPassword = "";
+            let user = null;
+
+            if (provider.user) {
+                // If user already exists, just update role
+                user = await User.findByIdAndUpdate(provider.user, { role: "serviceProvider" });
+            } else {
+                // If no user linked, check if user exists by email or create new
+                user = await User.findOne({ email: provider.email });
+
+                if (!user) {
+                    // Create new user with temp password
+                    tempPassword = crypto.randomBytes(5).toString("hex"); // 10 chars
+                    const hashed = await hashedPassword(tempPassword);
+                    user = await User.create({
+                        name: provider.ownerName,
+                        email: provider.email,
+                        password: hashed,
+                        role: "serviceProvider",
+                        isPasswordResetRequired: true
+                    });
+                } else {
+                    // User exists, update role
+                    user.role = "serviceProvider";
+                    await user.save();
+                }
+
+                // Link provider to user
+                provider.user = user._id;
+                await provider.save();
+            }
+
+            // Send approval email with credentials if tempPassword was generated
+            await emailService.sendApplicationApprovedEmail(
+                provider.email,
+                provider.ownerName,
+                tempPassword ? { password: tempPassword } : null
+            );
+        } else if (status === "rejected") {
+            // Send rejection email
+            await emailService.sendApplicationRejectedEmail(provider.email, provider.ownerName, req.body.reason || "Your application does not meet our requirements at this time.");
         }
 
         res.status(200).json({

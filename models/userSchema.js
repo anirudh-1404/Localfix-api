@@ -21,6 +21,21 @@ const userSchema = new mongoose.Schema(
       enum: ["admin", "serviceProvider", "customer"],
       default: "customer",
     },
+    addresses: [
+      {
+        line1: { type: String, required: true },
+        area: { type: String, required: true },
+        city: { type: String, required: true },
+        pincode: { type: String, required: true },
+        contactName: { type: String, required: true },
+        contactNumber: { type: String, required: true },
+        isDefault: { type: Boolean, default: false },
+      }
+    ],
+    isPasswordResetRequired: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,
