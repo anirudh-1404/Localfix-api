@@ -132,6 +132,7 @@ export const assignAdminRole = async (req, res) => {
     return res.status(500).json({ message: err.message });
   }
 };
+
 export const getAllUsers = async (req, res) => {
   try {
     const users = await User.find().select("-password");
@@ -143,5 +144,30 @@ export const getAllUsers = async (req, res) => {
     return res.status(500).json({
       message: err.message,
     });
+  }
+};
+
+// ✅ GET /api/auth/me — returns current logged-in user from cookie
+export const getMe = async (req, res) => {
+  try {
+    res.status(200).json({
+      success: true,
+      data: req.user,
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+// ✅ POST /api/auth/logout — clears the auth cookie
+export const logoutUser = async (req, res) => {
+  try {
+    res.cookie("token", "", {
+      httpOnly: true,
+      expires: new Date(0),
+    });
+    res.status(200).json({ success: true, message: "Logged out successfully" });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
   }
 };
