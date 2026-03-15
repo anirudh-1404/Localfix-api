@@ -12,6 +12,8 @@ import providerRoutes from "./routes/providerRoutes.js";
 import bookingRoutes from "./routes/bookingRoutes.js";
 import problemRoutes from "./routes/problemRoutes.js";
 import cartRoutes from "./routes/cartRoutes.js"
+import paymentRoutes from "./routes/paymentRoutes.js";
+
 
 import path from "path";
 import { fileURLToPath } from "url";
@@ -39,6 +41,8 @@ app.use("/api/providers", providerRoutes);
 app.use("/api/problems", problemRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/booking", bookingRoutes);
+app.use("/api/payment", paymentRoutes);
+
 app.get("/api/health", (req, res) => {
   res.status(200).json({ message: "Server is running", status: "ok" });
 });
