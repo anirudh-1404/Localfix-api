@@ -3,7 +3,7 @@ import { Service } from "../models/serviceSchema.js";
 // Create Service
 export const createService = async (req, res) => {
     try {
-        const { name, description, category, basePrice, icon } = req.body;
+        const { name, description, icon } = req.body;
 
         const existingService = await Service.findOne({ name });
         if (existingService) {
@@ -13,8 +13,6 @@ export const createService = async (req, res) => {
         const service = await Service.create({
             name,
             description,
-            category,
-            basePrice,
             icon,
         });
 

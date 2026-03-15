@@ -1,3 +1,4 @@
+
 import mongoose from "mongoose";
 
 const serviceSchema = new mongoose.Schema(
@@ -12,16 +13,8 @@ const serviceSchema = new mongoose.Schema(
             type: String,
             required: true,
         },
-        category: {
-            type: String,
-            required: true,
-        },
-        basePrice: {
-            type: Number,
-            required: true,
-        },
         icon: {
-            type: String, // String identifier or URL for an icon
+            type: String,
             default: "Hammer",
         },
     },
@@ -30,4 +23,32 @@ const serviceSchema = new mongoose.Schema(
     }
 );
 
-export const Service = mongoose.models.Service || mongoose.model("Service", serviceSchema);
+export const Service =
+    mongoose.models.Service || mongoose.model("Service", serviceSchema);
+
+const problemSchema = new mongoose.Schema(
+    {
+        service: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Service",
+            required: true,
+        },
+        title: {
+            type: String,
+            required: true,
+        },
+        description: {
+            type: String,
+        },
+        price: {
+            type: Number,
+            required: true,
+        },
+    },
+    {
+        timestamps: true,
+    }
+);
+
+export const Problem =
+    mongoose.models.Problem || mongoose.model("Problem", problemSchema);

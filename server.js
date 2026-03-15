@@ -10,14 +10,20 @@ import serviceRoutes from "./routes/serviceRoutes.js";
 import providerRoutes from "./routes/providerRoutes.js";
 import bookingRoutes from "./routes/bookingRoutes.js";
 import complaintRoutes from "./routes/complaintRoutes.js";
+import problemRoutes from "./routes/problemRoutes.js";
+import cartRoutes from "./routes/cartRoutes.js"
+
+import path from "path";
+import { fileURLToPath } from "url";
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const app = express();
 app.use(cors({
   origin: "http://localhost:5173",
   credentials: true,
-  methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
-  allowedHeaders: ["Content-Type", "Authorization"]
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+  allowedHeaders: ["Content-Type", "Authorization", "Cookie"]
 }));
 app.use(cookieParser());
 app.use(express.json({ limit: "10mb" }));
@@ -28,6 +34,13 @@ app.use("/api/services", serviceRoutes);
 app.use("/api/providers", providerRoutes);
 app.use("/api/bookings", bookingRoutes);      
 app.use("/api/complaints", complaintRoutes);
+app.use("/api/problems", problemRoutes);
+app.use("/api/cart", cartRoutes);
+app.use("/api/booking", bookingRoutes);
+app.get("/api/health", (req, res) => {
+  res.status(200).json({ message: "Server is running", status: "ok" });
+});
+
 
 const startServer = async () => {
   try {

@@ -3,12 +3,20 @@ import { User } from "../models/userSchema.js";
 // Protect routes - require login
 export const protect = async (req, res, next) => {
   let token;
+
+  console.log("Cookies:", req.cookies);
+  console.log("Auth Header:", req.headers.authorization);
+
+  // 1. Bearer token from header (Postman, mobile apps)
   if (req.headers.authorization && req.headers.authorization.startsWith("Bearer")) {
     token = req.headers.authorization.split(" ")[1];
   }
     else if (req.cookies?.token) {
     token = req.cookies.token;
   }
+
+  console.log("Extracted Token:", token ? "Token present" : "No token");
+
   if (!token) {
     return res.status(401).json({
       success: false,
@@ -22,10 +30,7 @@ export const protect = async (req, res, next) => {
       return res.status(401).json({ success: false, message: "User not found" });
     }
 
-    // if (!req.user.isActive) {
-    //   return res.status(401).json({ success: false, message: "Account is inactive" });
-    // }
-  next();
+    next();
   } catch (err) {
     console.error("Auth error:", err.message);
     return res.status(401).json({

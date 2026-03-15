@@ -20,7 +20,7 @@ const bookingSchema = new mongoose.Schema({
     required: true,
   },
   startTime: {
-    type: String,          
+    type: String,
     required: true,
   },
   durationMinutes: {
@@ -29,7 +29,7 @@ const bookingSchema = new mongoose.Schema({
   },
   address: {
     type: String,
-    required: true,         
+    required: true,
   },
   city: String,
   area: String,
@@ -43,12 +43,12 @@ const bookingSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
-    paymentStatus: {
+  paymentStatus: {
     type: String,
     enum: ['pending', 'paid', 'refunded'],
     default: 'pending',
   },
-    paymentMethod: {
+  paymentMethod: {
     type: String,
     enum: ['cash', 'online', 'wallet'],
     default: 'cash',

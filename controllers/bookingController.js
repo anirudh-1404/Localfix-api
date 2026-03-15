@@ -13,10 +13,12 @@ export const createBooking = async (req, res) => {
       city,
       area,
       pincode,
+      contactName,
+      contactNumber,
       customerNotes,
       paymentMethod = 'cash',
     } = req.body;
-    if (!providerId || !serviceId || !scheduledDate || !startTime) {
+    if (!providerId || !serviceId || !scheduledDate || !startTime || !address) {
       return res.status(400).json({ success: false, message: 'Missing required fields' });
     }
 
@@ -38,10 +40,12 @@ export const createBooking = async (req, res) => {
       service: serviceId,
       scheduledDate: new Date(scheduledDate),
       startTime,
-      address: address || `${provider.address.line1}, ${provider.address.area}`,
-      city: city || provider.address.city,
-      area: area || provider.address.area,
-      pincode: pincode || provider.address.pincode,
+      address,
+      city,
+      area,
+      pincode,
+      contactName: contactName || req.user.name,
+      contactNumber: contactNumber || '',
       customerNotes,
       paymentMethod,
       totalPrice,
