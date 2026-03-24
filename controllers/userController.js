@@ -164,6 +164,7 @@ export const assignAdminRole = async (req, res) => {
     return res.status(500).json({ message: err.message });
   }
 };
+
 export const getAllUsers = async (req, res) => {
   try {
     const users = await User.find().select("-password");
@@ -214,6 +215,7 @@ export const getAddresses = async (req, res) => {
     res.status(500).json({ success: false, message: err.message });
   }
 };
+
 
 export const addAddress = async (req, res) => {
   try {

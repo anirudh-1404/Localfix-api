@@ -18,4 +18,7 @@ router.post("/addresses", protect, addAddress);
 router.patch("/addresses/:addressId", protect, updateAddress);
 router.delete("/addresses/:addressId", protect, deleteAddress);
 
+router.get("/me", protect, getMe);        // ✅ GET /api/auth/me
+router.post("/logout", protect, logoutUser); // ✅ POST /api/auth/logout
+
 export default router;

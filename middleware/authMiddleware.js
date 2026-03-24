@@ -1,7 +1,5 @@
-// middleware/authMiddleware.js
 import jwt from "jsonwebtoken";
 import { User } from "../models/userSchema.js";
-
 // Protect routes - require login
 export const protect = async (req, res, next) => {
   let token;
@@ -13,8 +11,7 @@ export const protect = async (req, res, next) => {
   if (req.headers.authorization && req.headers.authorization.startsWith("Bearer")) {
     token = req.headers.authorization.split(" ")[1];
   }
-  // 2. httpOnly cookie (browser)
-  else if (req.cookies?.token) {
+    else if (req.cookies?.token) {
     token = req.cookies.token;
   }
 
@@ -26,13 +23,10 @@ export const protect = async (req, res, next) => {
       message: "Not authorized - no token provided",
     });
   }
-
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
-
     req.user = await User.findById(decoded.id).select("-password");
-
-    if (!req.user) {
+  if (!req.user) {
       return res.status(401).json({ success: false, message: "User not found" });
     }
 
