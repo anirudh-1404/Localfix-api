@@ -4,7 +4,7 @@ import { User } from '../models/userSchema.js';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import mongoose from 'mongoose';
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
-const GEMINI_MODEL_NAME = 'gemini-2.5-flash'; 
+const GEMINI_MODEL_NAME = 'gemini-2.5-flash';
 
 // In-memory chat sessions (key: userId_bookingId)
 // In production: use Redis, Mongo, or session store
@@ -161,27 +161,27 @@ Keep replies concise.
 `;
 
     const chatSession = model.startChat({
-  history: [
-    {
-      role: "user",
-      parts: [{ text: systemInstruction }],  // ← moved here
-    },
-    {
-      role: "model",
-      parts: [{ text: "Understood! I'll help you write a clear and professional complaint." }],
-    },
-    {
-      role: "user",
-      parts: [{ text: `Booking info: Service=${booking.service?.name || 'Unknown'}, Date=${booking.scheduledDate?.toDateString() || 'Unknown'}, Total=₹${booking.totalPrice || 'N/A'}, Status=${booking.status}. User role: ${allowedRole}.` }],
-    },
-    {
-      role: "model",
-      parts: [{ text: "Got it! Please describe what happened with your booking so I can help you write a good complaint." }],
-    },
-  ],
-  generationConfig: { temperature: 0.6, maxOutputTokens: 600 },
-  // ← systemInstruction REMOVED from here
-});
+      history: [
+        {
+          role: "user",
+          parts: [{ text: systemInstruction }],  // ← moved here
+        },
+        {
+          role: "model",
+          parts: [{ text: "Understood! I'll help you write a clear and professional complaint." }],
+        },
+        {
+          role: "user",
+          parts: [{ text: `Booking info: Service=${booking.service?.name || 'Unknown'}, Date=${booking.scheduledDate?.toDateString() || 'Unknown'}, Total=₹${booking.totalPrice || 'N/A'}, Status=${booking.status}. User role: ${allowedRole}.` }],
+        },
+        {
+          role: "model",
+          parts: [{ text: "Got it! Please describe what happened with your booking so I can help you write a good complaint." }],
+        },
+      ],
+      generationConfig: { temperature: 0.6, maxOutputTokens: 600 },
+      // ← systemInstruction REMOVED from here
+    });
 
     let firstReply = "Please tell me what issue you're facing with this booking.";
     if (initialMessage.trim()) {

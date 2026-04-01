@@ -9,7 +9,7 @@ import crypto from "crypto";
 export const enrollProvider = async (req, res) => {
     try {
         const {
-            businessName, phone, dob, gender, primaryService, otherServices,
+            businessName, phone, dob, gender, primaryService,
             additionalSkills, experience, serviceCategory, description,
             address, city, area, pincode, workingDays, workingHours,
             emergencyAvailability, idType, idNumber, email, ownerName
@@ -42,7 +42,6 @@ export const enrollProvider = async (req, res) => {
             profilePhoto,
             businessName,
             primaryService: (primaryService === "other" || !primaryService) ? null : primaryService,
-            otherServices,
             additionalSkills: additionalSkills ? JSON.parse(additionalSkills) : [],
             experience,
             serviceCategory,
@@ -85,7 +84,9 @@ export const enrollProvider = async (req, res) => {
 // Get All Providers (Admin)
 export const getAllProviders = async (req, res) => {
     try {
-        const providers = await Provider.find().populate("user", "name email");
+        const providers = await Provider.find()
+            .populate("user", "name email")
+            .populate("primaryService", "name");
         res.status(200).json({
             success: true,
             data: providers,
@@ -100,7 +101,9 @@ export const getProviderProfile = async (req, res) => {
     try {
         const provider = await Provider.findOne({
             $or: [{ _id: req.params.id }, { user: req.params.id }]
-        }).populate("user", "name email");
+        })
+            .populate("user", "name email")
+            .populate("primaryService", "name");
 
         if (!provider) {
             return res.status(404).json({ message: "Provider profile not found" });
@@ -118,9 +121,37 @@ export const getProviderProfile = async (req, res) => {
 // Update Provider Profile
 export const updateProviderProfile = async (req, res) => {
     try {
+        const updateData = { ...req.body };
+
+        // Parse stringified arrays/objects back into their original structure if they stringified by form-data
+        if (updateData.additionalSkills && typeof updateData.additionalSkills === 'string') {
+            updateData.additionalSkills = JSON.parse(updateData.additionalSkills);
+        }
+        if (updateData.workingDays && typeof updateData.workingDays === 'string') {
+            updateData.workingDays = JSON.parse(updateData.workingDays);
+        }
+        if (updateData.workingHours && typeof updateData.workingHours === 'string') {
+            updateData.workingHours = JSON.parse(updateData.workingHours);
+        }
+        if (updateData.emergencyAvailability) {
+            updateData.emergencyAvailability = updateData.emergencyAvailability === 'true';
+        }
+
+        // Handle uploaded images from cloudinary
+        if (req.files) {
+            if (req.files['profilePhoto'] && req.files['profilePhoto'][0]) {
+                updateData.profilePhoto = req.files['profilePhoto'][0].path; // Cloudinary URL automatically in path
+            }
+            if (req.files['certification'] && req.files['certification'][0]) {
+                updateData.certification = req.files['certification'][0].path;
+            }
+
+            // If they are updating ID proof, we update idImage inside idProof object using dot notation or by fetching existing
+        }
+
         const provider = await Provider.findOneAndUpdate(
             { user: req.params.id },
-            req.body,
+            { $set: updateData },
             { new: true, runValidators: true }
         );
 

@@ -42,11 +42,7 @@ const providerSchema = new mongoose.Schema(
         primaryService: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "Service",
-            required: false, // Made optional to support "Other" service
-        },
-        otherServices: {
-            type: String, // To capture details if primaryService is 'Other'
-            maxLength: 500,
+            required: true,
         },
         additionalSkills: [String],
         experience: {

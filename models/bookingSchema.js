@@ -9,7 +9,7 @@ const bookingSchema = new mongoose.Schema({
   provider: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Provider',
-    required: true
+    required: false
   },
   service: {
     type: mongoose.Schema.Types.ObjectId,
@@ -23,7 +23,7 @@ const bookingSchema = new mongoose.Schema({
   }],
   status: {
     type: String,
-    enum: ['pending', 'accepted', 'completed', 'cancelled'],
+    enum: ['pending', 'accepted', 'en_route', 'in_progress', 'completed', 'cancelled'],
     default: 'pending'
   },
   scheduledDate: {
@@ -84,7 +84,13 @@ const bookingSchema = new mongoose.Schema({
   cancelledBy: {
     type: String,
     enum: ['customer', 'provider', 'admin']
-  }
+  },
+  beforeImage: { type: String },
+  afterImage: { type: String },
+  providerRating: { type: Number, min: 1, max: 5 },
+  providerReview: { type: String },
+  customerRating: { type: Number, min: 1, max: 5 },
+  customerReview: { type: String }
 }, {
   timestamps: true
 });
