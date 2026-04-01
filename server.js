@@ -12,6 +12,8 @@ import bookingRoutes from "./routes/bookingRoutes.js";
 import complaintRoutes from "./routes/complaintRoutes.js";
 import problemRoutes from "./routes/problemRoutes.js";
 import cartRoutes from "./routes/cartRoutes.js"
+import paymentRoutes from "./routes/paymentRoutes.js";
+
 
 
 const __filename = fileURLToPath(import.meta.url);
@@ -30,11 +32,13 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.use("/api/auth", userRoutes);
 app.use("/api/services", serviceRoutes);
 app.use("/api/providers", providerRoutes);
-app.use("/api/bookings", bookingRoutes);      
+app.use("/api/bookings", bookingRoutes);
 app.use("/api/complaints", complaintRoutes);
 app.use("/api/problems", problemRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/booking", bookingRoutes);
+app.use("/api/payment", paymentRoutes);
+
 app.get("/api/health", (req, res) => {
   res.status(200).json({ message: "Server is running", status: "ok" });
 });

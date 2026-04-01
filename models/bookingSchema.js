@@ -1,74 +1,98 @@
 import mongoose from 'mongoose';
+
 const bookingSchema = new mongoose.Schema({
   customer: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    required: true,
+    required: true
   },
   provider: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Provider',
-    required: true,
+    required: false
   },
   service: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Service',
-    required: true,
+    required: true
+  },
+  problemItems: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Problem',
+    required: true
+  }],
+  status: {
+    type: String,
+    enum: ['pending', 'accepted', 'en_route', 'in_progress', 'completed', 'cancelled'],
+    default: 'pending'
   },
   scheduledDate: {
     type: Date,
-    required: true,
+    required: true
   },
   startTime: {
     type: String,
-    required: true,
-  },
-  durationMinutes: {
-    type: Number,
-    default: 60,
+    required: true
   },
   address: {
     type: String,
-    required: true,
+    required: true
   },
-  city: String,
-  area: String,
-  pincode: String,
-  status: {
+  city: {
     type: String,
-    enum: ['pending', 'confirmed', 'in-progress', 'completed', 'cancelled', 'rejected'],
-    default: 'pending',
+    required: true
+  },
+  area: {
+    type: String,
+    required: true
+  },
+  pincode: {
+    type: String,
+    required: true
+  },
+  contactName: {
+    type: String,
+    required: true
+  },
+  contactNumber: {
+    type: String,
+    required: true
+  },
+  customerNotes: {
+    type: String
   },
   totalPrice: {
     type: Number,
-    required: true,
-  },
-  paymentStatus: {
-    type: String,
-    enum: ['pending', 'paid', 'refunded'],
-    default: 'pending',
+    required: true
   },
   paymentMethod: {
     type: String,
-    enum: ['cash', 'online', 'wallet'],
-    default: 'cash',
+    enum: ['cash', 'online'],
+    default: 'cash'
   },
-  customerNotes: {
+  paymentStatus: {
     type: String,
-    maxlength: 500,
+    enum: ['pending', 'paid', 'failed'],
+    default: 'pending'
   },
-  providerRemarks: String,
-  adminRemarks: String,
+  razorpayOrderId: {
+    type: String
+  },
+  razorpayPaymentId: {
+    type: String
+  },
   cancelledBy: {
     type: String,
-    enum: ['customer', 'provider', 'admin', null],
+    enum: ['customer', 'provider', 'admin']
   },
-  cancellationReason: String,
+  beforeImage: { type: String },
+  afterImage: { type: String },
+  providerRating: { type: Number, min: 1, max: 5 },
+  providerReview: { type: String },
+  customerRating: { type: Number, min: 1, max: 5 },
+  customerReview: { type: String }
 }, {
-  timestamps: true,
+  timestamps: true
 });
-bookingSchema.index({ provider: 1, scheduledDate: 1, startTime: 1 });
-bookingSchema.index({ customer: 1, status: 1 });
-bookingSchema.index({ status: 1, createdAt: -1 });
 
 export const Booking = mongoose.models.Booking || mongoose.model('Booking', bookingSchema);

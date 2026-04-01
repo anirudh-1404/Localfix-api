@@ -166,3 +166,28 @@ export const removeFromCart = async (req, res) => {
         res.status(500).json({ message: "Server Error", error: error.message });
     }
 };
+
+// Clear entire cart
+export const clearCart = async (req, res) => {
+    try {
+        // userId should ideally come from req.user.id if using auth middleware
+        // For now, checking if it's passed in body or using req.user.id if available
+        const userId = req.user ? req.user.id : req.body.userId;
+
+        if (!userId) {
+            return res.status(400).json({ success: false, message: "User ID is required" });
+        }
+
+        const cart = await Cart.findOne({ userId });
+        if (cart) {
+            cart.items = [];
+            cart.totalPrice = 0;
+            await cart.save();
+        }
+
+        res.status(200).json({ success: true, message: "Cart cleared" });
+    } catch (error) {
+        console.error("Clear Cart Error:", error);
+        res.status(500).json({ success: false, message: "Server Error", error: error.message });
+    }
+};
